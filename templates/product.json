@@ -49,6 +49,15 @@
           "type": "description",
           "settings": {}
         },
+        "collapsible_tab_yLdLBD": {
+          "type": "collapsible_tab",
+          "settings": {
+            "heading": "More Details",
+            "icon": "none",
+            "content": "<p>Material: {{ product.metafields.custom.material.value }}</p>",
+            "page": ""
+          }
+        },
         "share": {
           "type": "share",
           "disabled": true,
@@ -65,6 +74,7 @@
         "price",
         "buy_buttons",
         "description",
+        "collapsible_tab_yLdLBD",
         "share"
       ],
       "settings": {
