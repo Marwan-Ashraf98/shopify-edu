@@ -23,6 +23,8 @@
   assign product_form_id = 'product-form-' | append: section.id
 -%}
 
+{%- capture disabled_html -%}{%- endcapture -%}
+
 {%- for value in option.values -%}
   {%- liquid
     assign option_disabled = true
@@ -46,35 +48,45 @@
   -%}
 
   {%- if block.settings.picker_type == 'button' -%}
-    <input
-      type="radio"
-      id="{{ section.id }}-{{ option.position }}-{{ forloop.index0 }}"
-      name="{{ option.name }}"
-      value="{{ value | escape }}"
-      form="{{ product_form_id }}"
-      {% if option.selected_value == value %}
-        checked
-      {% endif %}
-      {% if option_disabled %}
-        class="disabled"
-      {% endif %}
-    >
-    <label for="{{ section.id }}-{{ option.position }}-{{ forloop.index0 }}">
-      {{ value -}}
-      <span class="visually-hidden">{{ 'products.product.variant_sold_out_or_unavailable' | t }}</span>
-    </label>
+    {%- unless option_disabled -%}
+      <input
+        type="radio"
+        id="{{ section.id }}-{{ option.position }}-{{ forloop.index0 }}"
+        name="{{ option.name }}"
+        value="{{ value | escape }}"
+        form="{{ product_form_id }}"
+        {% if option.selected_value == value %}
+          checked
+        {% endif %}
+      >
+      <label for="{{ section.id }}-{{ option.position }}-{{ forloop.index0 }}">
+        {{ value -}}
+        <span class="visually-hidden">{{ 'products.product.variant_sold_out_or_unavailable' | t }}</span>
+      </label>
+    {%  else %}
+      {%- capture disabled_html -%}{{ disabled_html }}<li class="option-disabled" data-option-position="{{ option.position }}" data-option-value="{{ value | escape }}">{{ value | escape }}</li>{%- endcapture -%}
+    {% endunless %}
   {%- elsif block.settings.picker_type == 'dropdown' -%}
-    <option
-      value="{{ value | escape }}"
-      {% if option.selected_value == value %}
-        selected="selected"
-      {% endif %}
-    >
-      {% if option_disabled -%}
-        {{- 'products.product.value_unavailable' | t: option_value: value -}}
-      {%- else -%}
+    {%- unless option_disabled -%}
+      <option
+        value="{{ value | escape }}"
+        {% if option.selected_value == value %}
+          selected="selected"
+        {% endif %}
+      >
         {{- value -}}
-      {%- endif %}
-    </option>
+      </option>
+    {%- else -%}
+      {%- capture disabled_html -%}{{ disabled_html }}<li class="option-disabled" data-option-position="{{ option.position }}" data-option-value="{{ value | escape }}">{{ value | escape }}</li>{%- endcapture -%}
+    {% endunless %}
   {%- endif -%}
 {%- endfor -%}
+
+{%- unless disabled_html == '' -%}
+  <div class="product-disabled-options">
+    <h5>{{ 'products.product.inventory_out_of_stock' | t }} {{ option.name }}</h5>
+    <ol class="disabled-options-list">
+      {{ disabled_html }}
+    </ol>
+  </div>
+{%- endunless -%}
