@@ -208,6 +208,13 @@ quick-add-modal .product-form__buttons {
   padding: 0.8rem;
   min-width: 100%;
   box-sizing: border-box;
+  border-radius: 50%;
+  border: 1px solid black;
+}
+
+.quick-add__submit::before,
+.quick-add__submit::after {
+  display: none;
 }
 
 quick-add-modal .product-media-container.constrain-height {
