@@ -1,0 +1,84 @@
+.faq-heading {
+  font-family: 'Open Sans';   
+  font-weight: 400;
+  font-size: 19px;
+  text-indent: 20px;
+  color: #333;
+  margin: 0;
+}
+
+.faq-text {
+  font-family: 'Open Sans';   
+  font-weight: 400;
+  color: #919191;
+  width:95%;
+  padding-left:20px;
+  margin-bottom:30px;
+}
+
+.faq {
+  width: 1000px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 4px;
+  position: relative;
+}
+
+.faq label {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  padding-top:1px;
+  background-color: #FAFAFA;
+  border: 1px dashed teal;
+  margin-bottom: 12px;
+}
+
+.faq input[type="checkbox"] {
+  display: none;
+}
+
+.faq .faq-arrow-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    float: right;
+    position: relative;
+    top: -30px;
+    right: 27px;
+    border: 1px solid #333;
+    border-radius: 4px;
+}
+
+.faq .faq-arrow {
+  width: 8px;
+  height: 8px;
+  display: block;
+  border-top: 2px solid rgba(0, 0, 0, 0.33);
+  border-right: 2px solid rgba(0, 0, 0, 0.33);
+  transform: rotate(135deg);
+  bottom: 2px;
+  position: relative;
+}
+
+ .faq input[type="checkbox"]:checked + label > .faq-arrow-wrapper > .faq-arrow {
+  transform: rotate(315deg);
+  bottom: 0;
+}
+ .faq input[type="checkbox"]:checked + label {
+  display: block;
+  background: rgba(255,255,255,255) !important;
+  color: #4f7351;
+  height: fit-content;
+}
+
+ .faq input[type='checkbox']:not(:checked) + label {
+  display: block;
+  height: 40px;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
