@@ -1,0 +1,149 @@
+{{ 'section-hero-banner.css' | asset_url | stylesheet_tag }}
+
+<div class="hero-banner-wrapper">
+    <div class="hero-banner-image">
+        {%- liquid
+            assign image_height = section.settings.background_image.width | divided_by: section.settings.background_image.aspect_ratio
+            assign half_width = '50vw'
+            assign full_width = '100vw'
+            assign widths = '375, 550, 750, 1100, 1500, 1780, 2000, 3000, 3840'
+            assign sizes = full_width
+        -%}
+        {{
+            section.settings.background_image
+            | image_url: width: 3840
+            | image_tag:
+            loading: 'lazy',
+            width: section.settings.background_image.width,
+            height: image_height,
+            widths: widths,
+            sizes: sizes
+        }}
+    </div>
+    <div class="hero-banner-content">
+        <div class="hero-banner-box">
+            {%- for block in section.blocks -%}
+                {%- case block.type -%}
+                    {%- when 'heading' -%}
+                        <h2>{{ block.settings.heading }}</h2>
+                    {%- when 'text' -%}
+                        <div>
+                            <p>{{ block.settings.text }}</p>
+                        </div>
+                    {%- when 'buttons' -%}
+                        <div class="btn-box">
+                            {%- if block.settings.btn_1_label != blank -%}
+                                <a
+                                    class="btn"
+                                    {% if block.settings.btn_1_link == blank %}
+                                        role="link" aria-disabled="true"
+                                    {% else %}
+                                        href="{{ block.settings.btn_1_link }}"
+                                    {% endif %}
+                                >
+                                    {{- block.settings.btn_1_label | escape -}}
+                                </a>
+                            {%- endif -%}
+                            {%- if block.settings.btn_2_label != blank -%}
+                                <a
+                                    class="btn"
+                                    {% if block.settings.btn_2_link == blank %}
+                                        role="link" aria-disabled="true"
+                                    {% else %}
+                                        href="{{ block.settings.btn_2_link }}"
+                                    {% endif %}
+                                >
+                                    {{- block.settings.btn_2_label | escape -}}
+                                </a>
+                            {%- endif -%}
+                        </div>
+                {% endcase %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% schema %}
+{
+    "name": "Hero Banner",
+    "settings": [
+        {
+            "id": "background_image",
+            "type": "image_picker",
+            "label": "Background Image"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "heading",
+            "type": "heading",
+            "limit": 1,
+            "settings": [
+                {
+                    "id": "heading",
+                    "type": "text",
+                    "label": "heading",
+                    "default": "Hero banner"
+                }
+            ]
+        },
+        {
+            "name": "text",
+            "type": "text",
+            "limit": 1,
+            "settings": [
+                {
+                    "id": "text",
+                    "type": "textarea",
+                    "label": "text",
+                    "default": "Description or content for the hero banner template."
+                }
+            ]
+        },
+        {
+            "name": "CTA Buttons",
+            "type": "buttons",
+            "limit": 1,
+            "settings": [
+                {
+                    "id": "btn_1_label",
+                    "type": "text",
+                    "label": "Button 1 Label",
+                    "default": "Button Text"
+                },
+                {
+                    "id": "btn_1_link",
+                    "type": "url",
+                    "label": "Button 1 Link"
+                },
+                {
+                    "id": "btn_2_label",
+                    "type": "text",
+                    "label": "Button 2 Label",
+                    "default": "Button Text"
+                },
+                {
+                    "id": "btn_2_link",
+                    "type": "url",
+                    "label": "Button 2 Link"
+                }
+            ]
+        }
+    ],
+    "presets": [
+        {
+            "name": "Hero Banner",
+            "blocks": [
+                {
+                    "type": "heading"
+                },
+                {
+                    "type": "text"
+                },
+                {
+                    "type": "buttons"
+                }
+            ]
+        }
+    ]
+}
+{% endschema %}
