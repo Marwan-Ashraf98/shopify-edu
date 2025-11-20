@@ -10,7 +10,7 @@
             <div class="faq-arrow-wrapper">
                 <div class='faq-arrow'></div>
             </div>
-            <p class="faq-text">{{ block.settings.answer }}</p>
+            <div class="faq-text">{{ block.settings.answer }}</div>
         </label>
     {% endfor %}
 </div>
@@ -36,7 +36,7 @@
                     "id": "question"
                 },
                 {
-                    "type": "text",
+                    "type": "richtext",
                     "label": "answer",
                     "id": "answer"
                 }
