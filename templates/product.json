@@ -16,13 +16,6 @@
           "type": "title",
           "settings": {}
         },
-        "vendor": {
-          "type": "text",
-          "settings": {
-            "text": "{{ product.vendor }}",
-            "text_style": "body"
-          }
-        },
         "quantity_selector": {
           "type": "quantity_selector",
           "disabled": true,
@@ -49,6 +42,12 @@
           "type": "description",
           "settings": {}
         },
+        "custom_liquid_eQLUpq": {
+          "type": "custom_liquid",
+          "settings": {
+            "custom_liquid": "{% if product.metafields.custom.care_guide.value.title.value != blank %}\nCare Guide:\n{{ product.metafields.custom.care_guide.value.title.value }}\n{% endif %}"
+          }
+        },
         "collapsible_tab_yLdLBD": {
           "type": "collapsible_tab",
           "settings": {
@@ -68,12 +67,12 @@
       },
       "block_order": [
         "title",
-        "vendor",
         "quantity_selector",
         "price",
         "buy_buttons",
         "variant_picker",
         "description",
+        "custom_liquid_eQLUpq",
         "collapsible_tab_yLdLBD",
         "share"
       ],
