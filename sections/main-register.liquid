@@ -26,120 +26,105 @@
   <h1>
     {{ 'customer.register.title' | t }}
   </h1>
-  {%- form 'create_customer', novalidate: 'novalidate' -%}
-    {%- if form.errors -%}
-      <h2 class="form__message" tabindex="-1" autofocus>
-        <svg aria-hidden="true" focusable="false">
-          <use href="#icon-error" />
-        </svg>
-        {{ 'templates.contact.form.error_heading' | t }}
-      </h2>
-      <ul>
-        {%- for field in form.errors -%}
-          <li>
-            {%- if field == 'form' -%}
-              {{ form.errors.messages[field] }}
-            {%- else -%}
-              <a href="#RegisterForm-{{ field }}">
-                {{ form.errors.translated_fields[field] | capitalize }}
-                {{ form.errors.messages[field] }}
-              </a>
-            {%- endif -%}
-          </li>
-        {%- endfor -%}
-      </ul>
-    {%- endif -%}
+  <form id="customer_register_gql">
+    <div id="register-errors" class="form__message" style="display: none; color: red; margin-bottom: 1rem;"></div>
+    <div id="register-success" class="form__message" style="display: none; color: green; margin-bottom: 1rem;"></div>
+
     <div class="field">
-      <input
-        type="text"
-        name="customer[first_name]"
-        id="RegisterForm-FirstName"
-        {% if form.first_name %}
-          value="{{ form.first_name }}"
-        {% endif %}
-        autocomplete="given-name"
-        placeholder="{{ 'customer.register.first_name' | t }}"
-      >
-      <label for="RegisterForm-FirstName">
-        {{ 'customer.register.first_name' | t }}
-      </label>
+      <input type="text" name="firstName" id="RegisterForm-FirstName" placeholder="First Name">
+      <label for="RegisterForm-FirstName">First Name</label>
     </div>
+
     <div class="field">
-      <input
-        type="text"
-        name="customer[last_name]"
-        id="RegisterForm-LastName"
-        {% if form.last_name %}
-          value="{{ form.last_name }}"
-        {% endif %}
-        autocomplete="family-name"
-        placeholder="{{ 'customer.register.last_name' | t }}"
-      >
-      <label for="RegisterForm-LastName">
-        {{ 'customer.register.last_name' | t }}
-      </label>
+      <input type="text" name="lastName" id="RegisterForm-LastName" placeholder="Last Name">
+      <label for="RegisterForm-LastName">Last Name</label>
     </div>
+
     <div class="field">
-      <input
-        type="email"
-        name="customer[email]"
-        id="RegisterForm-email"
-        {% if form.email %}
-          value="{{ form.email }}"
-        {% endif %}
-        spellcheck="false"
-        autocapitalize="off"
-        autocomplete="email"
-        aria-required="true"
-        {% if form.errors contains 'email' %}
-          aria-invalid="true"
-          aria-describedby="RegisterForm-email-error"
-        {% endif %}
-        placeholder="{{ 'customer.register.email' | t }}"
-      >
-      <label for="RegisterForm-email">
-        {{ 'customer.register.email' | t }}
-      </label>
+      <input type="email" name="email" id="RegisterForm-email" required placeholder="Email">
+      <label for="RegisterForm-email">Email</label>
     </div>
-    {%- if form.errors contains 'email' -%}
-      <span id="RegisterForm-email-error" class="form__message">
-        <svg aria-hidden="true" focusable="false">
-          <use href="#icon-error" />
-        </svg>
-        {{ form.errors.translated_fields.email | capitalize }}
-        {{ form.errors.messages.email }}.
-      </span>
-    {%- endif -%}
+
     <div class="field">
-      <input
-        type="password"
-        name="customer[password]"
-        id="RegisterForm-password"
-        aria-required="true"
-        {% if form.errors contains 'password' %}
-          aria-invalid="true"
-          aria-describedby="RegisterForm-password-error"
-        {% endif %}
-        placeholder="{{ 'customer.register.password' | t }}"
-      >
-      <label for="RegisterForm-password">
-        {{ 'customer.register.password' | t }}
-      </label>
+      <input type="password" name="password" id="RegisterForm-password" required placeholder="Password">
+      <label for="RegisterForm-password">Password</label>
     </div>
-    {%- if form.errors contains 'password' -%}
-      <span id="RegisterForm-password-error" class="form__message">
-        <svg aria-hidden="true" focusable="false">
-          <use href="#icon-error" />
-        </svg>
-        {{ form.errors.translated_fields.password | capitalize }}
-        {{ form.errors.messages.password }}.
-      </span>
-    {%- endif -%}
-    <button>
+
+    <button type="submit" id="submitBtn">
       {{ 'customer.register.submit' | t }}
     </button>
-  {%- endform -%}
+  </form>
 </div>
+
+<script>
+  document.querySelector('#customer_register_gql').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const firstName = formData.get('firstName');
+    const lastName = formData.get('lastName');
+    const email = formData.get('email');
+    const password = formData.get('password');
+    const submitBtn = document.getElementById('submitBtn');
+
+    const mutation = `
+      mutation customerCreate($input: CustomerCreateInput!) {
+        customerCreate(input: $input) {
+          customer {
+            id
+            email
+          }
+          customerUserErrors {
+            field
+            message
+          }
+        }
+      }
+    `;
+
+    try {
+      submitBtn.setAttribute('disabled', true);
+
+      const response = await fetch('/api/2024-01/graphql.json', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Shopify-Storefront-Access-Token': window.ShopifyConfig.storefrontToken,
+        },
+        body: JSON.stringify({
+          query: mutation,
+          variables: {
+            input: {
+              firstName,
+              lastName,
+              email,
+              password,
+              acceptsMarketing: false
+            }
+          }
+        }),
+      });
+
+      const { data, errors } = await response.json();
+      
+      if (data.customerCreate.customerUserErrors.length > 0) {
+        const errorDiv = document.getElementById('register-errors');
+        errorDiv.innerHTML = data.customerCreate.customerUserErrors
+          .map(err => `<span>${err.message}</span>`)
+          .join('<br>');
+        errorDiv.style.display = 'block';
+      } else {
+        const successDiv = document.getElementById('register-success');
+        successDiv.innerHTML = '<span>New Account Created</span>';
+        successDiv.style.display = 'block';
+      }
+    } catch (err) {
+      console.error("Registration failed", err);
+    }
+
+    submitBtn.removeAttribute('disabled');
+  });
+</script>
 
 {% schema %}
 {
