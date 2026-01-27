@@ -60,7 +60,7 @@
         {% endif %}
       >
       <label for="{{ section.id }}-{{ option.position }}-{{ forloop.index0 }}">
-        {{ value -}}
+        <span style="background-color: {{ value.swatch.color }}; width: 20px; height: 20px; display: inline-block; border-radius: 3px;"></span>
         <span class="visually-hidden">{{ 'products.product.variant_sold_out_or_unavailable' | t }}</span>
       </label>
     {%  else %}
