@@ -1,149 +1,261 @@
+<div class="hero-section-wrapper" id="HeroSection-{{ section.id }}">
+  
+  <div class="hero-background">
+    {% if section.settings.media_type == 'video' and section.settings.video_url != blank %}
+      <div class="hero-video-container">
+        {% if section.settings.video_url.type == 'youtube' %}
+          <iframe src="https://www.youtube.com/embed/{{ section.settings.video_url.id }}?autoplay=1&loop=1&playlist={{ section.settings.video_url.id }}&controls=0&mute=1&playsinline=1&rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        {% elsif section.settings.video_url.type == 'vimeo' %}
+          <iframe src="https://player.vimeo.com/video/{{ section.settings.video_url.id }}?background=1&autoplay=1&loop=1&byline=0&title=0&muted=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        {% endif %}
+      </div>
+    {% else %}
+      {% if section.settings.image != blank %}
+        {{ section.settings.image | image_url: width: 2000 | image_tag: loading: 'lazy', class: 'hero-image' }}
+      {% else %}
+        {{ 'lifestyle-2' | placeholder_svg_tag: 'hero-image placeholder-svg' }}
+      {% endif %}
+    {% endif %}
+
+    <div class="hero-overlay" style="background-color: #000; opacity: {{ section.settings.overlay_opacity | divided_by: 100.0 }}; display: block;"></div>
+  </div>
+
+  {% if section.blocks.size > 0 %}
+    <div class="hero-content-container align-{{ section.settings.content_alignment }}">
+      
+      <div class="hero-content-box {% if section.settings.hide_box %}box-hidden{% endif %}">
+        {% for block in section.blocks %}
+          {% case block.type %}
+            
+            {% when 'heading' %}
+              <h2 class="hero-heading {% if section.settings.enable_text_shadow %}text-shadow{% endif %}" {{ block.shopify_attributes }}>
+                {{ block.settings.heading_text }}
+              </h2>
+
+            {% when 'text' %}
+              <div class="hero-text rte {% if section.settings.enable_text_shadow %}text-shadow{% endif %}" {{ block.shopify_attributes }}>
+                {{ block.settings.content_text }}
+              </div>
+
+            {% when 'buttons' %}
+              <div class="hero-buttons" {{ block.shopify_attributes }}>
+                {% if block.settings.btn1_label != blank %}
+                  <a href="{{ block.settings.btn1_link }}" class="hero-btn">{{ block.settings.btn1_label }}</a>
+                {% endif %}
+                {% if block.settings.btn2_label != blank %}
+                  <a href="{{ block.settings.btn2_link }}" class="hero-btn">{{ block.settings.btn2_label }}</a>
+                {% endif %}
+              </div>
+
+          {% endcase %}
+        {% endfor %}
+      </div>
+
+    </div>
+  {% endif %}
+</div>
+
+<style>
+    #HeroSection-{{ section.id }} {
+        --text-color: {{ section.settings.text_color }};
+        --box-bg-color: {% if section.settings.box_color == 'white' %}255, 255, 255{% else %}12, 12, 12{% endif %};
+        --box-opacity: {{ section.settings.box_opacity | divided_by: 100.0 }};
+        --cta-border: {{ section.settings.cta_border_color }};
+        --cta-text: {{ section.settings.cta_text_color }};
+        --cta-bg-hover: {{ section.settings.cta_border_color }};
+        --cta-text-hover: {% if section.settings.cta_border_color == '#FFFFFF' %}#000000{% else %}#FFFFFF{% endif %};
+    }
+</style>
+
 {{ 'section-hero-banner.css' | asset_url | stylesheet_tag }}
 
-<div class="hero-banner-wrapper">
-    <div class="hero-banner-image">
-        {%- liquid
-            assign image_height = section.settings.background_image.width | divided_by: section.settings.background_image.aspect_ratio
-            assign half_width = '50vw'
-            assign full_width = '100vw'
-            assign widths = '375, 550, 750, 1100, 1500, 1780, 2000, 3000, 3840'
-            assign sizes = full_width
-        -%}
-        {{
-            section.settings.background_image
-            | image_url: width: 3840
-            | image_tag:
-            loading: 'lazy',
-            width: section.settings.background_image.width,
-            height: image_height,
-            widths: widths,
-            sizes: sizes
-        }}
-    </div>
-    <div class="hero-banner-content">
-        <div class="hero-banner-box">
-            {%- for block in section.blocks -%}
-                {%- case block.type -%}
-                    {%- when 'heading' -%}
-                        <h2>{{ block.settings.heading }}</h2>
-                    {%- when 'text' -%}
-                        <div>
-                            <p>{{ block.settings.text }}</p>
-                        </div>
-                    {%- when 'buttons' -%}
-                        <div class="btn-box">
-                            {%- if block.settings.btn_1_label != blank -%}
-                                <a
-                                    class="btn"
-                                    {% if block.settings.btn_1_link == blank %}
-                                        role="link" aria-disabled="true"
-                                    {% else %}
-                                        href="{{ block.settings.btn_1_link }}"
-                                    {% endif %}
-                                >
-                                    {{- block.settings.btn_1_label | escape -}}
-                                </a>
-                            {%- endif -%}
-                            {%- if block.settings.btn_2_label != blank -%}
-                                <a
-                                    class="btn"
-                                    {% if block.settings.btn_2_link == blank %}
-                                        role="link" aria-disabled="true"
-                                    {% else %}
-                                        href="{{ block.settings.btn_2_link }}"
-                                    {% endif %}
-                                >
-                                    {{- block.settings.btn_2_label | escape -}}
-                                </a>
-                            {%- endif -%}
-                        </div>
-                {% endcase %}
-            {% endfor %}
-        </div>
-    </div>
-</div>
 {% schema %}
 {
-    "name": "Hero Banner",
-    "settings": [
+  "name": "Custom Hero Banner",
+  "max_blocks": 3,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Media Settings"
+    },
+    {
+      "type": "select",
+      "id": "media_type",
+      "label": "Media Type",
+      "options": [
+        { "value": "image", "label": "Image" },
+        { "value": "video", "label": "Video" }
+      ],
+      "default": "image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Banner Image"
+    },
+    {
+      "type": "video_url",
+      "id": "video_url",
+      "label": "Video URL",
+      "accept": ["youtube", "vimeo"],
+      "info": "Paste a YouTube or Vimeo link."
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "min": 0,
+      "max": 90,
+      "step": 10,
+      "unit": "%",
+      "label": "Dark Overlay Opacity",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Layout & Box Design"
+    },
+    {
+      "type": "select",
+      "id": "content_alignment",
+      "label": "Content Alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "box_color",
+      "label": "Box Color",
+      "options": [
+        { "value": "black", "label": "Black" },
+        { "value": "white", "label": "White" }
+      ],
+      "default": "black"
+    },
+    {
+      "type": "range",
+      "id": "box_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Box Opacity",
+      "default": 100
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_box",
+      "label": "Hide Box Background (Transparent)",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Text & CTA Styles"
+    },
+    {
+      "type": "select",
+      "id": "text_color",
+      "label": "Text Color",
+      "options": [
+        { "value": "#0C0C0C", "label": "Black" },
+        { "value": "#FFFFFF", "label": "White" }
+      ],
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_text_shadow",
+      "label": "Enable Text Drop Shadow",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "cta_border_color",
+      "label": "CTA Border Color",
+      "options": [
+        { "value": "#0C0C0C", "label": "Black" },
+        { "value": "#FFFFFF", "label": "White" }
+      ],
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "select",
+      "id": "cta_text_color",
+      "label": "CTA Text Color",
+      "options": [
+        { "value": "#0C0C0C", "label": "Black" },
+        { "value": "#FFFFFF", "label": "White" }
+      ],
+      "default": "#FFFFFF"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "heading",
+      "name": "Heading",
+      "settings": [
         {
-            "id": "background_image",
-            "type": "image_picker",
-            "label": "Background Image"
+          "type": "text",
+          "id": "heading_text",
+          "label": "Heading Text",
+          "default": "FALL / WINTER 2021"
         }
-    ],
-    "blocks": [
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Text Block",
+      "settings": [
         {
-            "name": "heading",
-            "type": "heading",
-            "limit": 1,
-            "settings": [
-                {
-                    "id": "heading",
-                    "type": "text",
-                    "label": "heading",
-                    "default": "Hero banner"
-                }
-            ]
+          "type": "richtext",
+          "id": "content_text",
+          "label": "Body Text",
+          "default": "<p>Our new collection is an ode to purity, fluidity and nature.</p>"
+        }
+      ]
+    },
+    {
+      "type": "buttons",
+      "name": "Call to Actions",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "btn1_label",
+          "label": "Button 1 Label",
+          "default": "SHOP MEN"
         },
         {
-            "name": "text",
-            "type": "text",
-            "limit": 1,
-            "settings": [
-                {
-                    "id": "text",
-                    "type": "textarea",
-                    "label": "text",
-                    "default": "Description or content for the hero banner template."
-                }
-            ]
+          "type": "url",
+          "id": "btn1_link",
+          "label": "Button 1 Link"
         },
         {
-            "name": "CTA Buttons",
-            "type": "buttons",
-            "limit": 1,
-            "settings": [
-                {
-                    "id": "btn_1_label",
-                    "type": "text",
-                    "label": "Button 1 Label",
-                    "default": "Button Text"
-                },
-                {
-                    "id": "btn_1_link",
-                    "type": "url",
-                    "label": "Button 1 Link"
-                },
-                {
-                    "id": "btn_2_label",
-                    "type": "text",
-                    "label": "Button 2 Label",
-                    "default": "Button Text"
-                },
-                {
-                    "id": "btn_2_link",
-                    "type": "url",
-                    "label": "Button 2 Link"
-                }
-            ]
-        }
-    ],
-    "presets": [
+          "type": "text",
+          "id": "btn2_label",
+          "label": "Button 2 Label",
+          "default": "SHOP WOMEN"
+        },
         {
-            "name": "Hero Banner",
-            "blocks": [
-                {
-                    "type": "heading"
-                },
-                {
-                    "type": "text"
-                },
-                {
-                    "type": "buttons"
-                }
-            ]
+          "type": "url",
+          "id": "btn2_link",
+          "label": "Button 2 Link"
         }
-    ]
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Custom Hero Banner",
+      "blocks": [
+        { "type": "heading" },
+        { "type": "text" },
+        { "type": "buttons" }
+      ]
+    }
+  ]
 }
 {% endschema %}
